@@ -2,11 +2,12 @@ const bcrypt = require("bcryptjs");
 const Admin = require("../models/admin");
 const jwt = require("jsonwebtoken");
 
-
+// Create JWT token
 const createToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
+// Signup controller
 exports.signup = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
@@ -18,6 +19,7 @@ exports.signup = async (req, res) => {
             });
         }
 
+        // Check if admin already exists
         const existing = await Admin.findOne({ email });
         if (existing) {
             return res.status(400).json({
@@ -26,7 +28,12 @@ exports.signup = async (req, res) => {
             });
         }
 
-        const admin = await Admin.create({ fullName, email, password });
+        // Hash password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create admin
+        const admin = await Admin.create({ fullName, email, password: hashedPassword });
 
         res.status(201).json({
             status: "success",
@@ -45,13 +52,20 @@ exports.signup = async (req, res) => {
     }
 };
 
-
+// Login controller
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const admin = await Admin.findOne({ email });
+        if (!email || !password) {
+            return res.status(400).json({
+                status: "error",
+                msg: "Email and password are required"
+            });
+        }
 
+        // Find admin by email
+        const admin = await Admin.findOne({ email });
         if (!admin) {
             return res.status(400).json({
                 status: "error",
@@ -59,8 +73,16 @@ exports.login = async (req, res) => {
             });
         }
 
-        
+        // Compare password
+        const isMatch = await bcrypt.compare(password, admin.password);
+        if (!isMatch) {
+            return res.status(400).json({
+                status: "error",
+                msg: "Incorrect password"
+            });
+        }
 
+        // Generate token
         const token = createToken(admin._id);
 
         res.status(200).json({
@@ -81,4 +103,3 @@ exports.login = async (req, res) => {
         });
     }
 };
-
