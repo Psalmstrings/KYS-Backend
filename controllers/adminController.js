@@ -59,14 +59,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        // const isMatch = await bcrypt.compare(password, admin.password);
-
-        // if (!isMatch) {
-        //     return res.status(400).json({
-        //         status: "error",
-        //         msg: "Password is incorrect"
-        //     });
-        // }
+        
 
         const token = createToken(admin._id);
 
