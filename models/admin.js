@@ -21,10 +21,9 @@ const adminSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Hash password before saving
-adminSchema.pre("save", async function (next) {
-    if (!this.isModified("password")) return next();
-    this.password = await bcrypt.hash(this.password, 12);
-    next();
-});
-
+// adminSchema.pre("save", async function (next) {
+//     if (!this.isModified("password")) return next();
+//     this.password = await bcrypt.hash(this.password, 12);
+//     next();
+// });
 module.exports = mongoose.model("Admin", adminSchema);

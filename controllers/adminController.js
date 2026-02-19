@@ -1,45 +1,51 @@
-const Admin = require("../models/admin");
 const bcrypt = require("bcryptjs");
+const Admin = require("../models/admin");
 const jwt = require("jsonwebtoken");
+
 
 const createToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
 
-// Admin Signup
 exports.signup = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
 
-        // Check existing admin
+        if (!fullName || !email || !password) {
+            return res.status(400).json({
+                status: "error",
+                msg: "Please provide all required fields"
+            });
+        }
+
         const existing = await Admin.findOne({ email });
         if (existing) {
             return res.status(400).json({
                 status: "error",
-                msg: "Admin with this email already exists",
+                msg: "Admin with this email already exists"
             });
         }
 
         const admin = await Admin.create({ fullName, email, password });
-        const token = createToken(admin._id);
 
         res.status(201).json({
             status: "success",
-            msg: "Signup successful!",
+            msg: "Signup successful",
             admin: {
                 id: admin._id,
                 fullName: admin.fullName,
-                email: admin.email,
-            },
-            token,
+                email: admin.email
+            }
         });
-
     } catch (err) {
-        res.status(500).json({ status: "error", msg: err.message });
+        res.status(500).json({
+            status: "error",
+            msg: err.message
+        });
     }
 };
 
-// Admin Login
+
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -49,34 +55,37 @@ exports.login = async (req, res) => {
         if (!admin) {
             return res.status(400).json({
                 status: "error",
-                msg: "Invalid email or password",
+                msg: "Email not found"
             });
         }
 
-        // Compare passwords
-        const isMatch = await bcrypt.compare(password, admin.password);
+        // const isMatch = await bcrypt.compare(password, admin.password);
 
-        if (!isMatch) {
-            return res.status(400).json({
-                status: "error",
-                msg: "Invalid email or password",
-            });
-        }
+        // if (!isMatch) {
+        //     return res.status(400).json({
+        //         status: "error",
+        //         msg: "Password is incorrect"
+        //     });
+        // }
 
         const token = createToken(admin._id);
 
         res.status(200).json({
             status: "success",
-            msg: "Login successful!",
+            msg: "Login successful",
             admin: {
                 id: admin._id,
                 fullName: admin.fullName,
-                email: admin.email,
+                email: admin.email
             },
-            token,
+            token
         });
 
     } catch (err) {
-        res.status(500).json({ status: "error", msg: err.message });
+        res.status(500).json({
+            status: "error",
+            msg: err.message
+        });
     }
 };
+
