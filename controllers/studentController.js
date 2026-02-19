@@ -1,22 +1,19 @@
 const Student = require("../models/student");
 
 exports.createStudent = async (req, res) => {
-    try {
-        //If student already exist
-        const existingStudent = await Student.findOne({ email: req.body.email, phone: req.body.phone });
-        if (existingStudent) {
-            return res.status(408).json({ 
-                status: "error",
-                msg: "This Student already exists" 
-            });
-        }
+  try {
+    const student = await Student.create(req.body);
 
-        const student = await Student.create(req.body);
-        res.status(201).json(student);
-    } catch (err) {
-        res.status(400).json({ msg: err.message });
-    }
+    res.status(201).json({
+      status: "success",
+      data: student
+    });
+
+  } catch (err) {
+    res.status(400).json({ msg: err.message });
+  }
 };
+
 
 exports.getStudents = async (req, res) => {
     try {
