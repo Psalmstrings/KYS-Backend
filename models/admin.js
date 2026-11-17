@@ -1,29 +1,38 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
-const adminSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema(
+  {
     fullName: {
-        type: String,
-        required: true,
-        trim: true,
+      type: String,
+      required: true,
+      trim: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true,
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
     },
     password: {
-        type: String,
-        required: true,
-        minlength: 6,
+      type: String,
+      required: true,
+      minlength: 6,
     },
-}, { timestamps: true });
+    role: {
+      type: String,
+      enum: ["kyc_admin", "kyc_viewer", "superadmin"],
+      default: "kyc_admin",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastLogin: {
+      type: Date,
+    },
+  },
+  { timestamps: true }
+);
 
-// Hash password before saving
-// adminSchema.pre("save", async function (next) {
-//     if (!this.isModified("password")) return next();
-//     this.password = await bcrypt.hash(this.password, 12);
-//     next();
-// });
 module.exports = mongoose.model("Admin", adminSchema);

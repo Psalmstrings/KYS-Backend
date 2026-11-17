@@ -1,44 +1,121 @@
 const mongoose = require("mongoose");
 
-const studentSchema = new mongoose.Schema({
-    fullName: { 
-        type: String, 
-        required: true, 
-        trim: true,
-        match: [/^[A-Za-z\s]+$/, "Full name should only contain letters and spaces"]
+const studentSchema = new mongoose.Schema(
+  {
+    registrationId: {
+      type: String,
+      unique: true,
+      index: true,
     },
-    dob: { type: Date, required: true },
-    email: { 
-        type: String, 
-        required: true, 
-        unique: true, 
-        lowercase: true,
-        trim: true,
-        match: [/.+\@.+\..+/, "Please provide a valid email address"]
+    fullName: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    gender: { 
-        type: String, 
-        required: true, 
-        enum: ["Male", "Female", "Other"]
+    dob: {
+      type: Date,
+      required: true,
     },
-    phone: { 
-        type: String, 
-        required: true, 
-        trim: true,
-        match: [/^\d{10,15}$/, "Please provide a valid phone number"]
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      index: true,
     },
-    lgaOrigin: { type: String, required: true },
-    stateOrigin: { type: String, required: true },
-    address: { type: String, required: true },
-    stateResidence: { type: String, required: true },
-    institution: { type: String, required: true },
-    course: { type: String, required: true },
-    level: { 
-        type: String, 
-        required: true, 
-        enum: ["100", "200", "300", "400", "500", "600", "Other"] 
+    gender: {
+      type: String,
+      required: true,
+      enum: ["Male", "Female", "Other"],
     },
-    receivedBursary: { type: Boolean, default: false }
-}, { timestamps: true });
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
+    lgaOrigin: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    stateOrigin: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    stateResidence: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    institution: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
+    course: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    level: {
+      type: String,
+      required: true,
+      enum: ["100", "200", "300", "400", "500", "600", "Other"],
+    },
+    matricNo: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    receivedBursary: {
+      type: Boolean,
+      default: false,
+    },
+    passportPhoto: {
+      type: String,
+      default: "",
+    },
+    idCardImage: {
+      type: String,
+      default: "",
+    },
+    verificationStatus: {
+      type: String,
+      enum: ["Pending", "Verified", "Rejected"],
+      default: "Pending",
+      index: true,
+    },
+    verifiedAt: {
+      type: Date,
+    },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Admin",
+    },
+    remarks: {
+      type: String,
+      default: "",
+    },
+  },
+  { timestamps: true }
+);
+
+// Pre-save hook in Mongoose 9
+studentSchema.pre("save", function () {
+  if (!this.registrationId) {
+    const randomPart = Math.floor(100000 + Math.random() * 900000);
+    this.registrationId = `KYS-ZD-${new Date().getFullYear()}-${randomPart}`;
+  }
+});
 
 module.exports = mongoose.model("Student", studentSchema);
